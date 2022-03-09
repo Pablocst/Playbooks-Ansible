@@ -1,0 +1,28 @@
+root@ip-172-31-10-30:/home/ansible/playbooks# cat adjust_history.yaml 
+---
+- name: Ajustando o Timestamp e o Filesize do history
+  hosts: test_clients
+  remote_user: root
+  become: true
+  tasks:
+    #- name: adicionar linha no bash_profile
+      #ansible.builtin.script: /home/ansible/playbooks/adjust_history.sh
+    - name: Ajustando variaveis
+      blockinfile:
+        dest: /etc/profile
+        marker: "### {mark} ANSIBLE MANAGED BLOCK: bash settings ###"
+        content: |
+          export HISTCONTROL=
+          export HISTFILE=$HOME/.bash_history
+          export HISTFILESIZE={{ harden_bash_histfilesize | default(5000) }}
+          export HISTSIZE={{ harden_bash_histsize | default(5000) }}
+          export HISTTIMEFORMAT="{{ harden_bash_histtimeformat | default('%d/%m/%y %T ') }}"
+          if [ "X$SHELL" = '/bin/bash' ]; then
+          typeset -r HISTCONTROL
+          typeset -r HISTFILE
+          typeset -r HISTFILESIZE
+          typeset -r HISTIGNORE
+          typeset -r HISTSIZE
+          typeset -r HISTTIMEFORMAT
+          fi
+      tags: bash
